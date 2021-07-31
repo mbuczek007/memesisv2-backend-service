@@ -4,7 +4,7 @@ module.exports = (app) => {
   var router = require('express').Router();
 
   // Create a new Entry
-  router.post('/', entries.create);
+  router.post('/add', entries.create);
 
   // Retrieve all Entries
   router.get('/', entries.findAll);
@@ -18,13 +18,8 @@ module.exports = (app) => {
   // Delete a Entry with id
   router.delete('/delete/:id', entries.delete);
 
-  /*
-  // Update a Tutorial with id
-  router.put('/:id', tutorials.update);
-
-  // Delete all Tutorials
-  router.delete('/', tutorials.deleteAll);
-  */
+  // Update a Entry with id
+  router.put('/update/:id', entries.update);
 
   app.use('/api/entries', router);
 };

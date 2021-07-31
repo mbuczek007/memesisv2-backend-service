@@ -47,11 +47,16 @@ exports.create = async (req, res) => {
 };
 
 exports.findAll = (req, res) => {
-  const title = req.query.title;
-  var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
-
-  Entry.findAll({ where: condition })
+  Entry.findAll()
     .then((data) => {
+      if (data.length === 0) {
+        res.status(404).send({
+          message: 'Entries not found.',
+        });
+
+        return;
+      }
+
       res.send(data);
     })
     .catch((err) => {
@@ -66,6 +71,14 @@ exports.findOne = (req, res) => {
 
   Entry.findByPk(id)
     .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: 'Entry with id=' + id + ' not found',
+        });
+
+        return;
+      }
+
       res.send(data);
     })
     .catch((err) => {
@@ -78,6 +91,14 @@ exports.findOne = (req, res) => {
 exports.findAllAcceptedEntries = (req, res) => {
   Entry.findAll({ where: { is_accepted: true } })
     .then((data) => {
+      if (data.length === 0) {
+        res.status(404).send({
+          message: 'Accepted entries not found.',
+        });
+
+        return;
+      }
+
       res.send(data);
     })
     .catch((err) => {
@@ -99,7 +120,7 @@ exports.delete = (req, res) => {
           message: 'Entry was deleted successfully!',
         });
       } else {
-        res.send({
+        res.status(404).send({
           message: `Cannot delete Entry with id=${id}. Maybe Entry was not found!`,
         });
       }
@@ -111,46 +132,26 @@ exports.delete = (req, res) => {
     });
 };
 
-/*
-// Update a Tutorial by the id in the request
 exports.update = (req, res) => {
   const id = req.params.id;
 
-  Tutorial.update(req.body, {
-    where: { id: id },
+  Entry.update(req.body, {
+    where: { entry_id: id },
   })
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: 'Tutorial was updated successfully.',
+          message: 'Entry was updated successfully.',
         });
       } else {
-        res.send({
-          message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found or req.body is empty!`,
+        res.status(404).send({
+          message: `Cannot update Entry with id=${id}. Maybe Entry was not found or req.body is empty!`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: 'Error updating Tutorial with id=' + id,
+        message: 'Error updating Entry with id=' + id,
       });
     });
 };
-
-// Delete all Tutorials from the database.
-exports.deleteAll = (req, res) => {
-  Tutorial.destroy({
-    where: {},
-    truncate: false,
-  })
-    .then((nums) => {
-      res.send({ message: `${nums} Tutorials were deleted successfully!` });
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message:
-          err.message || 'Some error occurred while removing all tutorials.',
-      });
-    });
-};
-*/
