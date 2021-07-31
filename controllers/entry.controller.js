@@ -61,21 +61,57 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Tutorial with an id
-/*exports.findOne = (req, res) => {
+exports.findOne = (req, res) => {
   const id = req.params.id;
 
-  Tutorial.findByPk(id)
+  Entry.findByPk(id)
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: 'Error retrieving Tutorial with id=' + id,
+        message: 'Error retrieving Entry with id=' + id,
       });
     });
 };
 
+exports.findAllAcceptedEntries = (req, res) => {
+  Entry.findAll({ where: { is_accepted: true } })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving entries.',
+      });
+    });
+};
+
+exports.delete = (req, res) => {
+  const id = req.params.id;
+
+  Entry.destroy({
+    where: { entry_id: id },
+  })
+    .then((num) => {
+      if (num == 1) {
+        res.send({
+          message: 'Entry was deleted successfully!',
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Entry with id=${id}. Maybe Entry was not found!`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: 'Could not delete Entry with id=' + id,
+      });
+    });
+};
+
+/*
 // Update a Tutorial by the id in the request
 exports.update = (req, res) => {
   const id = req.params.id;
@@ -101,31 +137,6 @@ exports.update = (req, res) => {
     });
 };
 
-// Delete a Tutorial with the specified id in the request
-exports.delete = (req, res) => {
-  const id = req.params.id;
-
-  Tutorial.destroy({
-    where: { id: id },
-  })
-    .then((num) => {
-      if (num == 1) {
-        res.send({
-          message: 'Tutorial was deleted successfully!',
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Tutorial with id=${id}. Maybe Tutorial was not found!`,
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Could not delete Tutorial with id=' + id,
-      });
-    });
-};
-
 // Delete all Tutorials from the database.
 exports.deleteAll = (req, res) => {
   Tutorial.destroy({
@@ -142,17 +153,4 @@ exports.deleteAll = (req, res) => {
       });
     });
 };
-
-// Find all published Tutorials
-exports.findAllPublished = (req, res) => {
-  Tutorial.findAll({ where: { published: true } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message:
-          err.message || 'Some error occurred while retrieving tutorials.',
-      });
-    });
-}; */
+*/
