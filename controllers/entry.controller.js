@@ -47,7 +47,12 @@ exports.create = async (req, res) => {
 };
 
 exports.findAll = (req, res) => {
-  Entry.findAll()
+  const status = req.query.status;
+  const ststusCondition = {
+    is_accepted: status === 'accepted' ? true : false,
+  };
+
+  Entry.findAll({ where: status ? ststusCondition : null })
     .then((data) => {
       if (data.length === 0) {
         res.status(404).send({
@@ -84,46 +89,6 @@ exports.findOne = (req, res) => {
     .catch((err) => {
       res.status(500).send({
         message: 'Error retrieving Entry with id=' + id,
-      });
-    });
-};
-
-exports.findAllAcceptedEntries = (req, res) => {
-  Entry.findAll({ where: { is_accepted: true } })
-    .then((data) => {
-      if (data.length === 0) {
-        res.status(404).send({
-          message: 'Accepted entries not found.',
-        });
-
-        return;
-      }
-
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || 'Some error occurred while retrieving entries.',
-      });
-    });
-};
-
-exports.findAllNotAcceptedEntries = (req, res) => {
-  Entry.findAll({ where: { is_accepted: false } })
-    .then((data) => {
-      if (data.length === 0) {
-        res.status(404).send({
-          message: 'Not Accepted entries not found.',
-        });
-
-        return;
-      }
-
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || 'Some error occurred while retrieving entries.',
       });
     });
 };

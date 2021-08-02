@@ -9,12 +9,6 @@ module.exports = (app) => {
   // Retrieve all Entries
   router.get('/', entries.findAll);
 
-  // Retrieve all accepted Entries
-  router.get('/accepted', entries.findAllAcceptedEntries);
-
-  // Retrieve all not accepted Entries
-  router.get('/pending', entries.findAllNotAcceptedEntries);
-
   // Retrieve a single Entry with id
   router.get('/:id', entries.findOne);
 
