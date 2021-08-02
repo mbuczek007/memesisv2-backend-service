@@ -12,6 +12,9 @@ module.exports = (app) => {
   // Retrieve all accepted Entries
   router.get('/accepted', entries.findAllAcceptedEntries);
 
+  // Retrieve all not accepted Entries
+  router.get('/pending', entries.findAllNotAcceptedEntries);
+
   // Retrieve a single Entry with id
   router.get('/:id', entries.findOne);
 
@@ -19,7 +22,7 @@ module.exports = (app) => {
   router.delete('/delete/:id', entries.delete);
 
   // Update a Entry with id
-  router.put('/update/:id', entries.update);
+  router.put('/updateAcceptances/:id', entries.updateAcceptanceStatus);
 
   app.use('/api/entries', router);
 };

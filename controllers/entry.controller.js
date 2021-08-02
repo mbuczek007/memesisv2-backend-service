@@ -108,6 +108,26 @@ exports.findAllAcceptedEntries = (req, res) => {
     });
 };
 
+exports.findAllNotAcceptedEntries = (req, res) => {
+  Entry.findAll({ where: { is_accepted: false } })
+    .then((data) => {
+      if (data.length === 0) {
+        res.status(404).send({
+          message: 'Not Accepted entries not found.',
+        });
+
+        return;
+      }
+
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving entries.',
+      });
+    });
+};
+
 exports.delete = (req, res) => {
   const id = req.params.id;
 
@@ -132,26 +152,37 @@ exports.delete = (req, res) => {
     });
 };
 
-exports.update = (req, res) => {
+exports.updateAcceptanceStatus = (req, res) => {
   const id = req.params.id;
 
-  Entry.update(req.body, {
-    where: { entry_id: id },
-  })
+  Entry.update(
+    {
+      is_accepted: req.body.is_accepted,
+      updated_date: db.Sequelize.fn('now'),
+      accepted_date: db.Sequelize.fn('now'),
+      updated_ip_address: req.clientIp,
+    },
+    {
+      where: {
+        entry_id: id,
+      },
+    }
+  )
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: 'Entry was updated successfully.',
+          message: 'Acceptance status for Entry was changed successfully.',
         });
       } else {
         res.status(404).send({
-          message: `Cannot update Entry with id=${id}. Maybe Entry was not found or req.body is empty!`,
+          message: `Entry with id=${id} was not found`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: 'Error updating Entry with id=' + id,
+        message:
+          'Error during change acceptacne status for Entry with id=' + id,
       });
     });
 };

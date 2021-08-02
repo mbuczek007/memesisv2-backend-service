@@ -27,6 +27,5 @@ db.sourceType.hasOne(db.entry, {
     allowNull: false,
   },
 });
-/*db.entry.belongsTo(db.sourceType);*/
 
 module.exports = db;
