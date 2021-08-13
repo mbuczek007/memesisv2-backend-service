@@ -19,11 +19,35 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.entry = require('./entry.model.js')(sequelize, Sequelize);
+db.entryVote = require('./entryVote.model.js')(sequelize, Sequelize);
 db.sourceType = require('./sourceType.model.js')(sequelize, Sequelize);
+db.entryComment = require('./entryComment.model.js')(sequelize, Sequelize);
+db.commentVote = require('./commentVote.model.js')(sequelize, Sequelize);
 
 db.sourceType.hasOne(db.entry, {
   foreignKey: {
     name: 'source_type_id',
+    allowNull: false,
+  },
+});
+
+db.entry.hasOne(db.entryVote, {
+  foreignKey: {
+    name: 'entry_id',
+    allowNull: false,
+  },
+});
+
+db.entry.hasOne(db.entryComment, {
+  foreignKey: {
+    name: 'entry_id',
+    allowNull: false,
+  },
+});
+
+db.entryComment.hasOne(db.commentVote, {
+  foreignKey: {
+    name: 'entry_comment_id',
     allowNull: false,
   },
 });
