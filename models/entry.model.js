@@ -20,6 +20,10 @@ module.exports = (sequelize, Sequelize) => {
       source_info: {
         type: Sequelize.STRING(1000),
       },
+      source_type: {
+        type: Sequelize.STRING(20),
+        allowNull: false,
+      },
       nick_name: {
         type: Sequelize.STRING(50),
         allowNull: false,
