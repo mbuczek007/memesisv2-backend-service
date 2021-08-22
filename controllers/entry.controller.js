@@ -3,6 +3,7 @@ const db = require('../models');
 const Op = db.Sequelize.Op;
 
 const Entry = db.entry;
+const EntryVote = db.entryVote;
 
 const getPagination = (page, size) => {
   const limit = size ? +size : 3;
@@ -12,7 +13,9 @@ const getPagination = (page, size) => {
 };
 
 const getPagingData = (data, page, limit) => {
-  const { count: totalItems, rows: entries } = data;
+  const { count, rows: entries } = data;
+
+  const totalItems = count.length;
 
   const currentPage = page ? +page : 0;
   const totalPages = Math.ceil(totalItems / limit);
@@ -102,22 +105,41 @@ exports.create = async (req, res) => {
 exports.findAll = (req, res) => {
   const { page, size, status, order } = req.query;
 
-  const ststusCondition = {
+  let conditions = {
     is_accepted: status === 'accepted' ? true : false,
+    is_blocked: false,
   };
+
+  let orderBy = status === 'accepted' ? 'accepted_date' : 'created_date';
+
+  if (status === 'blocked') {
+    conditions = {
+      is_blocked: true,
+    };
+
+    orderBy = 'updated_date';
+  }
 
   const { limit, offset } = getPagination(page, size);
 
   Entry.findAndCountAll({
-    where: status ? ststusCondition : null,
+    where: conditions,
     limit,
     offset,
-    order: [
-      [
-        status === 'accepted' ? 'accepted_date' : 'created_date',
-        order ? order : 'DESC',
+    order: [[orderBy, order ? order : 'DESC']],
+    attributes: {
+      include: [
+        [
+          db.Sequelize.fn(
+            'COUNT',
+            db.Sequelize.col('entry_vote.entry_vote_id')
+          ),
+          'votes_count',
+        ],
       ],
-    ],
+    },
+    include: [{ model: EntryVote, attributes: [] }],
+    group: ['entries.entry_id'],
   })
     .then((data) => {
       const response = getPagingData(data, page, limit);

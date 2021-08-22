@@ -23,6 +23,7 @@ const db = require('./models');
 db.sequelize.sync();
 
 require('./routes/entry.routes')(app);
+require('./routes/entryVote.routes')(app);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
