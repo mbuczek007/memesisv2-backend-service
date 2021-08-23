@@ -19,11 +19,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(6000),
         allowNull: false,
       },
-      created_date: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
       is_blocked: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
@@ -39,7 +34,7 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     {
-      timestamps: false,
+      timestamps: true,
     }
   );
 

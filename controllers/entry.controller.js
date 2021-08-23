@@ -3,6 +3,7 @@ const db = require('../models');
 const Op = db.Sequelize.Op;
 
 const Entry = db.entry;
+const EntryComment = db.entryComment;
 const EntryVote = db.entryVote;
 
 const getPagination = (page, size) => {
@@ -93,7 +94,9 @@ exports.create = async (req, res) => {
 
   Entry.create(entry)
     .then((data) => {
-      res.send(data);
+      res.send({
+        message: 'Entry was added.',
+      });
     })
     .catch((err) => {
       res.status(500).send({
@@ -129,6 +132,12 @@ exports.findAll = (req, res) => {
     order: [[orderBy, order ? order : 'DESC']],
     attributes: {
       include: [
+        [
+          db.Sequelize.literal(
+            '(SELECT COUNT(*) FROM entry_comments WHERE entry_comments.entry_id=entries.entry_id)'
+          ),
+          'comments_count',
+        ],
         [
           db.Sequelize.fn(
             'COUNT',
