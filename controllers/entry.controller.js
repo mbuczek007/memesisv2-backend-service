@@ -1,9 +1,7 @@
 const getVideoId = require('get-video-id');
 const db = require('../models');
-const Op = db.Sequelize.Op;
 
 const Entry = db.entry;
-const EntryComment = db.entryComment;
 const EntryVote = db.entryVote;
 
 const getPagination = (page, size) => {
@@ -89,6 +87,7 @@ exports.create = async (req, res) => {
     source_type: req.body.source_type,
     nick_name: req.body.nick_name,
     disable_comments: req.body.disable_comments,
+    is_private: req.body.is_private,
     created_ip_address: req.clientIp,
   };
 
@@ -111,16 +110,30 @@ exports.findAll = (req, res) => {
   let conditions = {
     is_accepted: status === 'accepted' ? true : false,
     is_blocked: false,
+    is_private: false,
   };
 
-  let orderBy = status === 'accepted' ? 'accepted_date' : 'created_date';
+  let orderBy = status === 'accepted' ? 'accepted_date' : 'createdAt';
+
+  if (!status) {
+    conditions = null;
+    orderBy = 'createdAt';
+  }
 
   if (status === 'blocked') {
     conditions = {
       is_blocked: true,
     };
 
-    orderBy = 'updated_date';
+    orderBy = 'updatedAt';
+  }
+
+  if (status === 'private') {
+    conditions = {
+      is_private: true,
+    };
+
+    orderBy = 'updatedAt';
   }
 
   const { limit, offset } = getPagination(page, size);
@@ -173,11 +186,32 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
-  Entry.findByPk(id)
+  Entry.findOne({
+    where: { entry_id: id, is_blocked: false, is_private: false },
+    attributes: {
+      include: [
+        [
+          db.Sequelize.literal(
+            '(SELECT COUNT(*) FROM entry_comments WHERE entry_comments.entry_id=entries.entry_id)'
+          ),
+          'comments_count',
+        ],
+        [
+          db.Sequelize.fn(
+            'COUNT',
+            db.Sequelize.col('entry_vote.entry_vote_id')
+          ),
+          'votes_count',
+        ],
+      ],
+    },
+    include: [{ model: EntryVote, attributes: [] }],
+    group: ['entries.entry_id'],
+  })
     .then((data) => {
       if (!data) {
         res.status(404).send({
-          message: 'Entry with id=' + id + ' not found',
+          message: 'Entry with id=' + id + ' not found, is private or blocked',
         });
 
         return;
@@ -216,19 +250,25 @@ exports.delete = (req, res) => {
     });
 };
 
-exports.accept = (req, res) => {
+exports.accept = async (req, res) => {
   const id = req.params.id;
+
+  const notAcceptedBefore = await Entry.findOne({
+    where: { entry_id: id },
+  });
 
   Entry.update(
     {
       is_accepted: true,
-      updated_date: db.Sequelize.fn('now'),
-      accepted_date: db.Sequelize.fn('now'),
+      accepted_date: notAcceptedBefore.accepted_date
+        ? notAcceptedBefore.accepted_date
+        : db.Sequelize.fn('now'),
       updated_ip_address: req.clientIp,
     },
     {
       where: {
         entry_id: id,
+        is_accepted: false,
       },
     }
   )
@@ -239,13 +279,46 @@ exports.accept = (req, res) => {
         });
       } else {
         res.status(404).send({
-          message: `Entry with id=${id} was not found`,
+          message: `Entry with id=${id} was not found or entry is already accepted`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
         message: 'Error during accept Entry with id=' + id,
+      });
+    });
+};
+
+exports.reject = (req, res) => {
+  const id = req.params.id;
+
+  Entry.update(
+    {
+      is_accepted: false,
+      updated_ip_address: req.clientIp,
+    },
+    {
+      where: {
+        entry_id: id,
+        is_accepted: true,
+      },
+    }
+  )
+    .then((num) => {
+      if (num == 1) {
+        res.send({
+          message: 'Entry was moved to pending.',
+        });
+      } else {
+        res.status(404).send({
+          message: `Entry with id=${id} was not found or entry is already in pending status.`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: 'Error during reject Entry with id=' + id,
       });
     });
 };

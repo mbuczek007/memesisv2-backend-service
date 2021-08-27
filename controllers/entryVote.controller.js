@@ -28,12 +28,16 @@ exports.addVote = async (req, res) => {
   }
 
   const checkEntryExists = await Entry.findOne({
-    where: { entry_id: req.body.entry_id, is_blocked: false },
+    where: {
+      entry_id: req.body.entry_id,
+      is_blocked: false,
+      is_private: false,
+    },
   });
 
   if (!checkEntryExists) {
     res.status(400).send({
-      message: 'Entry with this ID not exists or is blocked',
+      message: 'Entry with this ID not exists is blocked or is private.',
     });
 
     return;

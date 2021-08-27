@@ -44,14 +44,10 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         defaultValue: false,
       },
-      created_date: {
-        type: Sequelize.DATE,
+      is_private: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      updated_date: {
-        type: Sequelize.DATE,
-        allowNull: true,
+        defaultValue: false,
       },
       accepted_date: {
         type: Sequelize.DATE,
@@ -66,7 +62,7 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     {
-      timestamps: false,
+      timestamps: true,
     }
   );
 

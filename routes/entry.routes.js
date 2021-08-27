@@ -15,8 +15,11 @@ module.exports = (app) => {
   // Delete a Entry with id
   router.delete('/delete/:id', entries.delete);
 
-  // Update a Entry with id
+  // Accept a Entry with id
   router.put('/accept/:id', entries.accept);
+
+  // Reject a Entry with id
+  router.put('/reject/:id', entries.reject);
 
   app.use('/api/entries', router);
 };
