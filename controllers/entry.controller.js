@@ -1,8 +1,15 @@
 const getVideoId = require('get-video-id');
 const db = require('../models');
+const nodeHtmlToImage = require('node-html-to-image');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 
 const Entry = db.entry;
 const EntryVote = db.entryVote;
+
+const generateFileName = () => {
+  return uuidv4() + '-' + Date.now();
+};
 
 const getPagination = (page, size) => {
   const limit = size ? +size : 3;
@@ -54,7 +61,8 @@ exports.create = async (req, res) => {
   if (
     req.body.source_type !== 'file' &&
     req.body.source_type !== 'url' &&
-    req.body.source_type !== 'yt-video'
+    req.body.source_type !== 'yt-video' &&
+    req.body.source_type !== 'text'
   ) {
     res.status(400).send({
       message: 'Source type is not valid.',
@@ -63,12 +71,13 @@ exports.create = async (req, res) => {
     return;
   }
 
-  let source = req.body.source;
+  let source = req.body.source ? req.body.source : null;
 
-  if (req.body.source_type == 'yt-video') {
+  if (req.body.source_type === 'yt-video') {
     const { id } = getVideoId(source);
 
     if (id) {
+      const youtubeThumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
       source = id;
     } else {
       res.status(400).send({
@@ -77,12 +86,115 @@ exports.create = async (req, res) => {
 
       return;
     }
+  } else if (req.body.source_type === 'file' && req.files) {
+    const file = req.files.source;
+    const extensionName = path.extname(file.name);
+    const allowedExtension = ['.png', '.jpg', '.jpeg'];
+
+    if (!allowedExtension.includes(extensionName)) {
+      res.status(400).send({
+        message: 'Invalid Image extension',
+      });
+
+      return;
+    }
+
+    const buffer = req.files.source.data;
+    const b64 = Buffer.from(buffer).toString('base64');
+    const mimeType = req.files.source.mimetype;
+
+    source = `data:${mimeType};base64,${b64}`;
+  }
+
+  const imageName = `entry-image-${generateFileName()}.jpg`;
+  const sourceElem = source ? `<img src="${source}" alt/>` : '';
+  const description = req.body.description
+    ? `<div class="desc">${req.body.description}</div>`
+    : '';
+
+  const image = await nodeHtmlToImage({
+    type: 'jpeg',
+    quality: 80,
+    output: `./uploads/${imageName}`,
+    html: `<html>
+    <head>
+      <style>
+        html {
+          -webkit-font-smoothing: antialiased;
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          width: 662px;
+          height: auto;
+          font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+          line-hright: 1.2;
+          border: 1px solid rgba(145, 158, 171, 0.24);
+          padding: 30px;
+          margin: 0;
+          box-sizing: border-box;
+        }
+
+        img {
+          width: 100%;
+          height: auto;
+        }
+
+        .ql-align-center {
+          text-align: center;
+        }
+
+        .ql-align-right {
+          text-align: right
+        }
+
+        .ql-align-justify {
+          text-align: justify;
+        }
+
+        h2 {
+          margin: 0;
+          text-align: center;
+          font-weight: 700;
+          padding: 15px 0 5px;
+          display: block;
+          line-height: 1.334;
+          font-size: 28px;
+          color: #fda92d;
+        }
+
+        .desc,
+        p  {
+          font-size: 18px;
+          color: #212b36;
+        }
+
+      </style>
+    </head>
+    <body>
+        ${sourceElem}
+        <h2>
+          ${req.body.title}
+       </h2>
+      ${description}
+    </body>
+  </html>
+  `,
+  });
+
+  if (!image) {
+    res.status(400).send({
+      message: 'Problem to generate image.',
+    });
+
+    return;
   }
 
   const entry = {
     title: req.body.title,
     description: req.body.description,
-    source,
+    source: imageName,
     source_info: req.body.source_info,
     source_type: req.body.source_type,
     nick_name: req.body.nick_name,

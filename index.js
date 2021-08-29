@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const requestIp = require('request-ip');
+const path = require('path');
 
 const app = express();
 
@@ -13,6 +14,9 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(requestIp.mw());
+
+const directory = path.join(__dirname, '/uploads');
+app.use('/uploads', express.static(directory));
 
 const db = require('./models');
 

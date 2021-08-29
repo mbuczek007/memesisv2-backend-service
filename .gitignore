@@ -26,3 +26,6 @@ yarn-error.log*
 #editors
 .idea
 debug.log
+
+#media
+/uploads

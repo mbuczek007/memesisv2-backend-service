@@ -1,10 +1,18 @@
 module.exports = (app) => {
   const entries = require('../controllers/entry.controller.js');
+  const fileUpload = require('express-fileupload');
 
   var router = require('express').Router();
 
   // Create a new Entry
-  router.post('/add', entries.create);
+  router.post(
+    '/add',
+    fileUpload({
+      limits: { fileSize: 1 * 1024 * 1024 }, // 1mb
+      abortOnLimit: true,
+    }),
+    entries.create
+  );
 
   // Retrieve all Entries
   router.get('/', entries.findAll);
