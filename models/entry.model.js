@@ -49,6 +49,11 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         defaultValue: false,
       },
+      is_archived: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       accepted_date: {
         type: Sequelize.DATE,
         allowNull: true,

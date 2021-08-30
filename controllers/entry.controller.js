@@ -1,8 +1,9 @@
 const getVideoId = require('get-video-id');
-const db = require('../models');
 const nodeHtmlToImage = require('node-html-to-image');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+
+const db = require('../models');
 
 const Entry = db.entry;
 const EntryVote = db.entryVote;
@@ -72,13 +73,14 @@ exports.create = async (req, res) => {
   }
 
   let source = req.body.source ? req.body.source : null;
+  let imageName = `entry-image-${generateFileName()}.jpg`;
 
   if (req.body.source_type === 'yt-video') {
     const { id } = getVideoId(source);
 
     if (id) {
-      const youtubeThumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-      source = id;
+      source = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+      imageName = `entry-image-${id}-${generateFileName()}.jpg`;
     } else {
       res.status(400).send({
         message: 'Video Link is not valid.',
@@ -106,7 +108,6 @@ exports.create = async (req, res) => {
     source = `data:${mimeType};base64,${b64}`;
   }
 
-  const imageName = `entry-image-${generateFileName()}.jpg`;
   const sourceElem = source ? `<img src="${source}" alt/>` : '';
   const description = req.body.description
     ? `<div class="desc">${req.body.description}</div>`
@@ -223,6 +224,7 @@ exports.findAll = (req, res) => {
     is_accepted: status === 'accepted' ? true : false,
     is_blocked: false,
     is_private: false,
+    is_archived: false,
   };
 
   let orderBy = status === 'accepted' ? 'accepted_date' : 'createdAt';
@@ -243,6 +245,14 @@ exports.findAll = (req, res) => {
   if (status === 'private') {
     conditions = {
       is_private: true,
+    };
+
+    orderBy = 'updatedAt';
+  }
+
+  if (status === 'archived') {
+    conditions = {
+      is_archived: true,
     };
 
     orderBy = 'updatedAt';
