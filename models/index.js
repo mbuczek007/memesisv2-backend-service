@@ -23,6 +23,16 @@ db.entryVote = require('./entryVote.model.js')(sequelize, Sequelize);
 db.entryComment = require('./entryComment.model.js')(sequelize, Sequelize);
 db.commentVote = require('./commentVote.model.js')(sequelize, Sequelize);
 
+db.user = require('./user.model.js')(sequelize, Sequelize);
+db.userRole = require('./userRole.model.js')(sequelize, Sequelize);
+
+db.userRole.hasMany(db.user, {
+  foreignKey: {
+    name: 'role_id',
+    allowNull: false,
+  },
+});
+
 db.entry.hasOne(
   db.entryVote,
   {
