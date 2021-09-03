@@ -1,8 +1,9 @@
 module.exports = (app) => {
   const entries = require('../controllers/entry.controller.js');
   const fileUpload = require('express-fileupload');
+  const { authJwt } = require('../middleware');
 
-  var router = require('express').Router();
+  const router = require('express').Router();
 
   // Create a new Entry
   router.post(
@@ -11,6 +12,7 @@ module.exports = (app) => {
       limits: { fileSize: 1 * 1024 * 1024 }, // 1mb
       abortOnLimit: true,
     }),
+    [authJwt.verifyToken],
     entries.create
   );
 
@@ -21,13 +23,34 @@ module.exports = (app) => {
   router.get('/:id', entries.findOne);
 
   // Delete a Entry with id
-  router.delete('/delete/:id', entries.delete);
+  router.delete(
+    '/delete/:id',
+    [authJwt.verifyToken, authJwt.isModeratorOrAdmin],
+    entries.delete
+  );
 
   // Accept a Entry with id
-  router.put('/accept/:id', entries.accept);
+  router.put(
+    '/accept/:id',
+    [authJwt.verifyToken, authJwt.isModeratorOrAdmin],
+    entries.accept
+  );
 
   // Reject a Entry with id
-  router.put('/reject/:id', entries.reject);
+  router.put(
+    '/reject/:id',
+    [authJwt.verifyToken, authJwt.isModeratorOrAdmin],
+    entries.reject
+  );
+
+  app.use(function (req, res, next) {
+    res.header(
+      'Access-Control-Allow-Headers',
+      'x-access-token, Origin, Content-Type, Accept'
+    );
+
+    next();
+  });
 
   app.use('/api/entries', router);
 };

@@ -61,6 +61,7 @@ exports.createComment = async (req, res) => {
         : null,
       nick_name: req.body.nick_name,
       created_ip_address: req.clientIp,
+      user_id: req.body.user_id,
     };
 
     EntryComment.create(comment)

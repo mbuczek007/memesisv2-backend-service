@@ -50,6 +50,7 @@ exports.addVote = async (req, res) => {
       entry_comment_id: req.body.entry_comment_id,
       vote_up: req.body.vote_mode,
       created_ip_address: req.clientIp,
+      user_id: req.body.user_id,
     };
 
     CommentVote.create(vote)

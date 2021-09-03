@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
         unique: true,
       },
       password: {
-        type: Sequelize.STRING(20),
+        type: Sequelize.STRING,
         allowNull: false,
       },
       email: {
@@ -23,7 +23,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       sex: {
         type: Sequelize.BOOLEAN,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 0,
       },
       is_blocked: {
@@ -38,8 +38,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       last_login_date: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
+        allowNull: true,
       },
       created_ip_address: {
         type: Sequelize.STRING(20),
@@ -47,7 +46,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       last_login_ip_address: {
         type: Sequelize.STRING(20),
-        allowNull: false,
+        allowNull: true,
       },
     },
     {

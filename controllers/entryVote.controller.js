@@ -44,6 +44,7 @@ exports.addVote = async (req, res) => {
   } else {
     const vote = {
       entry_id: req.body.entry_id,
+      user_id: req.body.user_id ? req.body.user_id : null,
       vote_up: true,
       created_ip_address: req.clientIp,
     };

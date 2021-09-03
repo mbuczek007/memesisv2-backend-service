@@ -202,6 +202,7 @@ exports.create = async (req, res) => {
     disable_comments: req.body.disable_comments,
     is_private: req.body.is_private,
     created_ip_address: req.clientIp,
+    user_id: req.body.user_id,
   };
 
   Entry.create(entry)
@@ -274,16 +275,13 @@ exports.findAll = (req, res) => {
           'comments_count',
         ],
         [
-          db.Sequelize.fn(
-            'COUNT',
-            db.Sequelize.col('entry_vote.entry_vote_id')
+          db.Sequelize.literal(
+            '(SELECT COUNT(*) FROM entry_votes WHERE entry_votes.entry_id=entries.entry_id)'
           ),
           'votes_count',
         ],
       ],
     },
-    include: [{ model: EntryVote, attributes: [] }],
-    group: ['entries.entry_id'],
   })
     .then((data) => {
       const response = getPagingData(data, page, limit);
@@ -319,16 +317,13 @@ exports.findOne = (req, res) => {
           'comments_count',
         ],
         [
-          db.Sequelize.fn(
-            'COUNT',
-            db.Sequelize.col('entry_vote.entry_vote_id')
+          db.Sequelize.literal(
+            '(SELECT COUNT(*) FROM entry_votes WHERE entry_votes.entry_id=entries.entry_id)'
           ),
           'votes_count',
         ],
       ],
     },
-    include: [{ model: EntryVote, attributes: [] }],
-    group: ['entries.entry_id'],
   })
     .then((data) => {
       if (!data) {

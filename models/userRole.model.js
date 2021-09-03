@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const UserRole = sequelize.define(
-    'user_roles',
+    'roles',
     {
       role_id: {
         type: Sequelize.INTEGER.UNSIGNED,
