@@ -13,14 +13,6 @@ exports.createComment = async (req, res) => {
     return;
   }
 
-  if (!req.body.nick_name) {
-    res.status(400).send({
-      message: 'Missing nick name.',
-    });
-
-    return;
-  }
-
   if (req.body.parent_comment_id) {
     const checkIfParentCommentExists = await EntryComment.findOne({
       where: {
@@ -59,7 +51,6 @@ exports.createComment = async (req, res) => {
       parent_comment_id: req.body.parent_comment_id
         ? req.body.parent_comment_id
         : null,
-      nick_name: req.body.nick_name,
       created_ip_address: req.clientIp,
       user_id: req.body.user_id,
     };
@@ -97,20 +88,25 @@ exports.getComments = (req, res) => {
       include: [
         [
           db.Sequelize.literal(
-            '(SELECT COUNT(*) FROM comment_votes WHERE comment_votes.entry_comment_id=entry_comments.entry_comment_id AND comment_votes.vote_up=1)'
+            '(SELECT COUNT(comment_vote_id) FROM comment_votes WHERE comment_votes.entry_comment_id=entry_comments.entry_comment_id AND comment_votes.vote_up=1)'
           ),
           'votes_up_count',
         ],
         [
           db.Sequelize.literal(
-            '(SELECT COUNT(*) FROM comment_votes WHERE comment_votes.entry_comment_id=entry_comments.entry_comment_id AND comment_votes.vote_up=0)'
+            '(SELECT COUNT(comment_vote_id) FROM comment_votes WHERE comment_votes.entry_comment_id=entry_comments.entry_comment_id AND comment_votes.vote_up=0)'
           ),
           'votes_down_count',
         ],
         [
-          db.Sequelize.fn(
-            'COUNT',
-            db.Sequelize.col('comment_vote.comment_vote_id')
+          db.Sequelize.literal(
+            '(SELECT name FROM users WHERE users.user_id=entry_comments.user_id)'
+          ),
+          'user_name',
+        ],
+        [
+          db.Sequelize.literal(
+            '(SELECT COUNT(comment_vote_id) FROM comment_votes WHERE comment_votes.entry_comment_id=entry_comments.entry_comment_id)'
           ),
           'votes_count',
         ],

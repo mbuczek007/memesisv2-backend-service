@@ -38,12 +38,12 @@ const initial = () => {
   });
 };
 
-db.sequelize.sync({ force: true }).then(() => {
+/*db.sequelize.sync({ force: true }).then(() => {
   console.log('Drop and re-sync db.');
   initial();
-});
+});*/
 
-/*db.sequelize.sync();*/
+db.sequelize.sync();
 
 require('./routes/entry.routes')(app);
 require('./routes/entryVote.routes')(app);

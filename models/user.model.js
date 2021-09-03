@@ -26,6 +26,9 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         defaultValue: 0,
       },
+      avatar: {
+        type: Sequelize.STRING(255),
+      },
       is_blocked: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

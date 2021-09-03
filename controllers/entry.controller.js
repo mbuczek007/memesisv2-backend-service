@@ -1,59 +1,15 @@
 const getVideoId = require('get-video-id');
 const nodeHtmlToImage = require('node-html-to-image');
-const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+const { utils } = require('../utils');
 
 const db = require('../models');
-
 const Entry = db.entry;
-const EntryVote = db.entryVote;
-
-const generateFileName = () => {
-  return uuidv4() + '-' + Date.now();
-};
-
-const getPagination = (page, size) => {
-  const limit = size ? +size : 3;
-  const offset = page ? page * limit : 0;
-
-  return { limit, offset };
-};
-
-const getPagingData = (data, page, limit) => {
-  const { count, rows: entries } = data;
-
-  const totalItems = count.length;
-
-  const currentPage = page ? +page : 0;
-  const totalPages = Math.ceil(totalItems / limit);
-
-  return { totalItems, entries, totalPages, currentPage };
-};
 
 exports.create = async (req, res) => {
   if (!req.body.title) {
     res.status(400).send({
       message: 'Title can not be empty.',
-    });
-
-    return;
-  }
-
-  if (!req.body.nick_name) {
-    res.status(400).send({
-      message: 'Nick can not be empty.',
-    });
-
-    return;
-  }
-
-  const nickExists = await Entry.findOne({
-    where: { nick_name: req.body.nick_name },
-  });
-
-  if (nickExists) {
-    res.status(400).send({
-      message: 'This nick exists.',
     });
 
     return;
@@ -73,14 +29,14 @@ exports.create = async (req, res) => {
   }
 
   let source = req.body.source ? req.body.source : null;
-  let imageName = `entry-image-${generateFileName()}.jpg`;
+  let imageName = `entry-image-${utils.generateFileName()}.jpg`;
 
   if (req.body.source_type === 'yt-video') {
     const { id } = getVideoId(source);
 
     if (id) {
       source = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-      imageName = `entry-image-${id}-${generateFileName()}.jpg`;
+      imageName = `entry-image-${id}-${utils.generateFileName()}.jpg`;
     } else {
       res.status(400).send({
         message: 'Video Link is not valid.',
@@ -198,7 +154,6 @@ exports.create = async (req, res) => {
     source: imageName,
     source_info: req.body.source_info,
     source_type: req.body.source_type,
-    nick_name: req.body.nick_name,
     disable_comments: req.body.disable_comments,
     is_private: req.body.is_private,
     created_ip_address: req.clientIp,
@@ -259,7 +214,7 @@ exports.findAll = (req, res) => {
     orderBy = 'updatedAt';
   }
 
-  const { limit, offset } = getPagination(page, size);
+  const { limit, offset } = utils.getPagination(page, size);
 
   Entry.findAndCountAll({
     where: conditions,
@@ -270,21 +225,27 @@ exports.findAll = (req, res) => {
       include: [
         [
           db.Sequelize.literal(
-            '(SELECT COUNT(*) FROM entry_comments WHERE entry_comments.entry_id=entries.entry_id)'
+            '(SELECT COUNT(entry_id) FROM entry_comments WHERE entry_comments.entry_id=entries.entry_id)'
           ),
           'comments_count',
         ],
         [
           db.Sequelize.literal(
-            '(SELECT COUNT(*) FROM entry_votes WHERE entry_votes.entry_id=entries.entry_id)'
+            '(SELECT COUNT(entry_id) FROM entry_votes WHERE entry_votes.entry_id=entries.entry_id)'
           ),
           'votes_count',
+        ],
+        [
+          db.Sequelize.literal(
+            '(SELECT name FROM users WHERE users.user_id=entries.user_id)'
+          ),
+          'user_name',
         ],
       ],
     },
   })
     .then((data) => {
-      const response = getPagingData(data, page, limit);
+      const response = utils.getPagingData(data, page, limit);
 
       if (response.entries.length === 0) {
         res.status(404).send({
@@ -312,15 +273,21 @@ exports.findOne = (req, res) => {
       include: [
         [
           db.Sequelize.literal(
-            '(SELECT COUNT(*) FROM entry_comments WHERE entry_comments.entry_id=entries.entry_id)'
+            '(SELECT COUNT(entry_id) FROM entry_comments WHERE entry_comments.entry_id=entries.entry_id)'
           ),
           'comments_count',
         ],
         [
           db.Sequelize.literal(
-            '(SELECT COUNT(*) FROM entry_votes WHERE entry_votes.entry_id=entries.entry_id)'
+            '(SELECT COUNT(entry_id) FROM entry_votes WHERE entry_votes.entry_id=entries.entry_id)'
           ),
           'votes_count',
+        ],
+        [
+          db.Sequelize.literal(
+            '(SELECT name FROM users WHERE users.user_id=entries.user_id)'
+          ),
+          'user_name',
         ],
       ],
     },

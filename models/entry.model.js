@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.TEXT,
       },
       source: {
-        type: Sequelize.STRING(1000),
+        type: Sequelize.STRING(255),
       },
       source_info: {
         type: Sequelize.STRING(1000),
@@ -23,11 +23,6 @@ module.exports = (sequelize, Sequelize) => {
       source_type: {
         type: Sequelize.STRING(20),
         allowNull: false,
-      },
-      nick_name: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        unique: true,
       },
       disable_comments: {
         type: Sequelize.BOOLEAN,

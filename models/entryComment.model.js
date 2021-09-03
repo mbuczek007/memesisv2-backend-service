@@ -11,10 +11,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: true,
       },
-      nick_name: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-      },
       comment: {
         type: Sequelize.STRING(6000),
         allowNull: false,
