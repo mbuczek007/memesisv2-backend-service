@@ -10,6 +10,9 @@ module.exports = (sequelize, Sequelize) => {
       name: {
         type: Sequelize.STRING(50),
         allowNull: false,
+        validate: {
+          max: 50,
+        },
       },
     },
     {

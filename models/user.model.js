@@ -11,6 +11,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(20),
         allowNull: false,
         unique: true,
+        validate: {
+          min: 3,
+          max: 20,
+        },
       },
       password: {
         type: Sequelize.STRING,
@@ -20,6 +24,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(40),
         allowNull: false,
         unique: true,
+        validate: {
+          isEmail: true,
+          max: 40,
+        },
       },
       sex: {
         type: Sequelize.BOOLEAN,
@@ -28,6 +36,9 @@ module.exports = (sequelize, Sequelize) => {
       },
       avatar: {
         type: Sequelize.STRING(255),
+        validate: {
+          max: 255,
+        },
       },
       is_blocked: {
         type: Sequelize.BOOLEAN,

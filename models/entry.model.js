@@ -10,15 +10,25 @@ module.exports = (sequelize, Sequelize) => {
       title: {
         type: Sequelize.STRING(200),
         allowNull: false,
+        validate: {
+          min: 3,
+          max: 20,
+        },
       },
       description: {
         type: Sequelize.TEXT,
       },
       source: {
         type: Sequelize.STRING(255),
+        validate: {
+          max: 255,
+        },
       },
       source_info: {
         type: Sequelize.STRING(1000),
+        validate: {
+          max: 1000,
+        },
       },
       source_type: {
         type: Sequelize.STRING(20),

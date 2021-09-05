@@ -14,6 +14,9 @@ module.exports = (sequelize, Sequelize) => {
       comment: {
         type: Sequelize.STRING(6000),
         allowNull: false,
+        validate: {
+          max: 6000,
+        },
       },
       is_blocked: {
         type: Sequelize.BOOLEAN,
