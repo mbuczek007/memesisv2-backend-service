@@ -19,6 +19,13 @@ module.exports = (app) => {
   // Retrieve all Entries
   router.get('/', entries.findAll);
 
+  // Retrieve all restricted Entries
+  router.get(
+    '/restricted/',
+    [authJwt.verifyToken, authJwt.isModeratorOrAdmin],
+    entries.findAllRestricted
+  );
+
   // Retrieve a single Entry with id
   router.get('/:id', entries.findOne);
 

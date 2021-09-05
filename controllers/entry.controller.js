@@ -190,6 +190,81 @@ exports.findAll = (req, res) => {
     orderBy = 'createdAt';
   }
 
+  if (status === 'archived') {
+    conditions = {
+      is_archived: true,
+    };
+
+    orderBy = 'updatedAt';
+  }
+
+  const { limit, offset } = utils.getPagination(page, size);
+
+  Entry.findAndCountAll({
+    where: conditions,
+    limit,
+    offset,
+    order: [[orderBy, order ? order : 'DESC']],
+    attributes: {
+      include: [
+        [
+          db.Sequelize.literal(
+            '(SELECT COUNT(entry_id) FROM entry_comments WHERE entry_comments.entry_id=entries.entry_id)'
+          ),
+          'comments_count',
+        ],
+        [
+          db.Sequelize.literal(
+            '(SELECT COUNT(entry_id) FROM entry_votes WHERE entry_votes.entry_id=entries.entry_id)'
+          ),
+          'votes_count',
+        ],
+        [
+          db.Sequelize.literal(
+            '(SELECT name FROM users WHERE users.user_id=entries.user_id)'
+          ),
+          'user_name',
+        ],
+      ],
+    },
+  })
+    .then((data) => {
+      const response = utils.getPagingData(data, page, limit);
+
+      if (response.entries.length === 0) {
+        res.status(404).send({
+          message: 'Entries not found.',
+        });
+
+        return;
+      }
+
+      res.send(response);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving entries.',
+      });
+    });
+};
+
+exports.findAllRestricted = (req, res) => {
+  const { page, size, status, order } = req.query;
+
+  let conditions = {
+    is_accepted: status === 'accepted' ? true : false,
+    is_blocked: false,
+    is_private: false,
+    is_archived: false,
+  };
+
+  let orderBy = status === 'accepted' ? 'accepted_date' : 'createdAt';
+
+  if (!status) {
+    conditions = null;
+    orderBy = 'createdAt';
+  }
+
   if (status === 'blocked') {
     conditions = {
       is_blocked: true,
