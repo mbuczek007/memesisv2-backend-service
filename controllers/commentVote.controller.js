@@ -23,7 +23,7 @@ exports.addVote = async (req, res) => {
   const checkIfAlreadyVoted = await CommentVote.findOne({
     where: {
       entry_comment_id: req.body.entry_comment_id,
-      created_ip_address: req.clientIp,
+      user_id: req.body.user_id,
     },
   });
 
@@ -35,13 +35,28 @@ exports.addVote = async (req, res) => {
     return;
   }
 
-  const checkCommentExists = await EntryComment.findOne({
-    where: { entry_comment_id: req.body.entry_comment_id },
+  const checkCommentAuthor = await EntryComment.findOne({
+    where: {
+      entry_comment_id: req.body.entry_comment_id,
+      user_id: req.body.user_id,
+    },
   });
 
-  if (!checkCommentExists) {
+  if (checkCommentAuthor) {
     res.status(400).send({
-      message: 'Comment with this ID not exists.',
+      message: 'Nie mozesz głosować na swój komentarz.',
+    });
+
+    return;
+  }
+
+  const checkCommentExistsOrBlock = await EntryComment.findOne({
+    where: { entry_comment_id: req.body.entry_comment_id, is_blocked: false },
+  });
+
+  if (!checkCommentExistsOrBlock) {
+    res.status(400).send({
+      message: 'Comment with this ID not exists or is blocked.',
     });
 
     return;

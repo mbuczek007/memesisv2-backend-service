@@ -64,8 +64,9 @@ exports.signin = (req, res) => {
         });
       }
 
+      const expirationTime = Math.floor(Date.now() / 1000) + 60 * 60; //60min
       const token = jwt.sign({ id: user.user_id }, config.secret, {
-        expiresIn: 86400, // 24 hours
+        expiresIn: expirationTime,
       });
 
       let authorities = [];
@@ -79,6 +80,7 @@ exports.signin = (req, res) => {
           email: user.email,
           roles: authorities,
           accessToken: token,
+          expirationTime,
         });
       });
     })
