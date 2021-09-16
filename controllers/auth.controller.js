@@ -52,6 +52,12 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: 'User Not found.' });
       }
 
+      if (user.is_blocked) {
+        return res
+          .status(404)
+          .send({ message: 'This user account was blocked.' });
+      }
+
       const passwordIsValid = bcrypt.compareSync(
         req.body.password,
         user.password
@@ -83,6 +89,18 @@ exports.signin = (req, res) => {
           expirationTime,
         });
       });
+
+      User.update(
+        {
+          last_login_date: db.Sequelize.fn('now'),
+          last_login_ip_address: req.clientIp,
+        },
+        {
+          where: {
+            user_id: user.user_id,
+          },
+        }
+      );
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
