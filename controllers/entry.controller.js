@@ -1,6 +1,7 @@
 const getVideoId = require('get-video-id');
 const nodeHtmlToImage = require('node-html-to-image');
 const path = require('path');
+const fs = require('fs');
 const { utils } = require('../utils');
 
 const db = require('../models');
@@ -385,28 +386,44 @@ exports.findOne = (req, res) => {
     });
 };
 
-exports.delete = (req, res) => {
+exports.delete = async (req, res) => {
   const id = req.params.id;
 
-  Entry.destroy({
-    where: { entry_id: id },
-  })
-    .then((num) => {
-      if (num == 1) {
-        res.send({
-          message: 'Entry was deleted successfully!',
-        });
-      } else {
-        res.status(404).send({
-          message: `Cannot delete Entry with id=${id}. Maybe Entry was not found!`,
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Could not delete Entry with id=' + id,
-      });
+  const deletedEntry = await Entry.findOne({
+    where: {
+      entry_id: id,
+    },
+  });
+
+  if (!deletedEntry) {
+    res.status(404).send({
+      message: `Cannot delete Entry with id=${id}. Maybe Entry was not found!`,
     });
+
+    return;
+  }
+
+  fs.unlink('./uploads/' + deletedEntry.source, (err) => {
+    if (err) {
+      res.status(404).send({
+        message: `Cannot delete Entry with id=${id}. Theres problem to delete image`,
+      });
+    } else {
+      Entry.destroy({
+        where: { entry_id: id },
+      })
+        .then(() => {
+          res.send({
+            message: 'Entry was deleted successfully!',
+          });
+        })
+        .catch(() => {
+          res.status(500).send({
+            message: 'Could not delete Entry with id=' + id,
+          });
+        });
+    }
+  });
 };
 
 exports.accept = async (req, res) => {
