@@ -21,12 +21,12 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
       },
       email: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING(100),
         allowNull: false,
         unique: true,
         validate: {
           isEmail: true,
-          max: 40,
+          max: 100,
         },
       },
       sex: {

@@ -2,14 +2,62 @@ const db = require('../models');
 const config = require('../config/auth.config');
 
 const User = db.user;
-const Role = db.userRole;
-
-const Op = db.Sequelize.Op;
 
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 
 exports.signup = (req, res) => {
+  if (
+    req.body.name === '' ||
+    req.body.email === '' ||
+    req.body.password === ''
+  ) {
+    res.status(400).send({
+      message: 'Fill all required fields.',
+    });
+
+    return;
+  }
+
+  if (
+    req.body.name.length < 3 ||
+    req.body.name.length > 20 ||
+    !req.body.name.match(/^[A-Za-z0-9_.]+$/)
+  ) {
+    res.status(400).send({
+      message:
+        'Nazwa uzytkownika powinna zawierać od 3 do 20 znaków. Dopuszczalne znaki to A-Z a-z 0-9 . _',
+    });
+
+    return;
+  }
+
+  if (
+    !req.body.email.match(
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    ) ||
+    req.body.email > 100
+  ) {
+    res.status(400).send({
+      message: 'Unvalid e-mail address.',
+    });
+
+    return;
+  }
+
+  if (
+    !req.body.password.match(
+      /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/
+    )
+  ) {
+    res.status(400).send({
+      message:
+        'Hasło powinno zawierać minimum 8 znaków, jedną duzą literę, jedną małą literę, liczbę oraz znak specjalny',
+    });
+
+    return;
+  }
+
   User.create({
     name: req.body.name,
     email: req.body.email,
@@ -18,23 +66,9 @@ exports.signup = (req, res) => {
     created_ip_address: req.clientIp,
   })
     .then((user) => {
-      if (req.body.roles) {
-        Role.findAll({
-          where: {
-            name: {
-              [Op.or]: req.body.roles,
-            },
-          },
-        }).then((roles) => {
-          user.setRoles(roles).then(() => {
-            res.send({ message: 'User was registered successfully!' });
-          });
-        });
-      } else {
-        user.setRoles([1]).then(() => {
-          res.send({ message: 'User was registered successfully!' });
-        });
-      }
+      user.setRoles([1]).then(() => {
+        res.send({ message: 'User was registered successfully!' });
+      });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
