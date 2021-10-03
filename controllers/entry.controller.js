@@ -72,11 +72,13 @@ exports.create = async (req, res) => {
 
   const image = await nodeHtmlToImage({
     type: 'jpeg',
-    quality: 80,
+    quality: 90,
     output: `./uploads/${imageName}`,
     html: `<html>
     <head>
       <style>
+        @import url('http://fonts.cdnfonts.com/css/signika');
+
         html {
           -webkit-font-smoothing: antialiased;
           margin: 0;
@@ -84,11 +86,10 @@ exports.create = async (req, res) => {
         }
 
         body {
-          width: 662px;
+          width: 702px;
           height: auto;
-          font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+          font-family: "Signika", "Helvetica", "Arial", sans-serif;
           line-hright: 1.2;
-          border: 1px solid rgba(145, 158, 171, 0.24);
           padding: 30px;
           margin: 0;
           box-sizing: border-box;
@@ -114,7 +115,7 @@ exports.create = async (req, res) => {
         h2 {
           margin: 0;
           text-align: center;
-          font-weight: 700;
+          font-weight: 400;
           padding: 15px 0 5px;
           display: block;
           line-height: 1.334;
@@ -126,12 +127,54 @@ exports.create = async (req, res) => {
         p  {
           font-size: 18px;
           color: #212b36;
+          font-weight: 300;
+          padding: 0 10px;
+        }
+
+        .image-outline {
+          position: relative;
+        }
+
+        .image-outline:before {
+          content: '';
+          position: absolute;
+          right: 8px;
+          bottom: 8px;
+          display: block;
+          width: 128px;
+          height: 30px;
+          background-color: #D5B036;
+        }
+
+        .image-outline:after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          display: block;
+          width: calc(100% - 20px);
+          height: calc(100% - 20px);
+          transform: translate(-50%, -50%);
+          background: transparent;
+          border: 3px solid #D5B036;
+        }
+
+        .ew-logo {
+          position: absolute;
+          z-index: 2;
+          bottom: 10px;
+          right: 15px;
+          width: 115px;
+          height: auto;
         }
 
       </style>
     </head>
     <body>
-        ${sourceElem}
+        <div class="image-outline">
+          <img src="https://i.ibb.co/s5Sq7rN/logo.png" class="ew-logo">
+          ${sourceElem}
+        </div>
         <h2>
           ${req.body.title}
        </h2>

@@ -14,7 +14,7 @@ getPagination = (page, size) => {
 getPagingData = (data, page, limit) => {
   const { count, rows: entries } = data;
 
-  const totalItems = count.length;
+  const totalItems = count;
 
   const currentPage = page ? +page : 0;
   const totalPages = Math.ceil(totalItems / limit);
