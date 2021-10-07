@@ -7,7 +7,7 @@ const path = require('path');
 const app = express();
 
 var corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: process.env.API_ORGIN,
 };
 
 app.use(cors(corsOptions));
@@ -52,7 +52,7 @@ require('./routes/commentVote.routes')(app);
 
 require('./routes/auth.routes')(app);
 
-const PORT = process.env.PORT;
+const PORT = process.env.API_PORT;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
