@@ -182,6 +182,10 @@ exports.create = async (req, res) => {
     </body>
   </html>
   `,
+    puppeteerArgs: {
+      args: ['--no-sandbox', '--headless'],
+      ignoreHTTPSErrors: true,
+    },
   });
 
   if (!image) {
