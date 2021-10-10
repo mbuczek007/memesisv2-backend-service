@@ -2,9 +2,10 @@ const db = require('../models');
 const config = require('../config/auth.config');
 
 const User = db.user;
+const { Op } = db.Sequelize;
 
-var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 exports.signup = (req, res) => {
   if (
@@ -78,7 +79,7 @@ exports.signup = (req, res) => {
 exports.signin = (req, res) => {
   User.findOne({
     where: {
-      name: req.body.name,
+      [Op.or]: [{ name: req.body.name }, { email: req.body.name }],
     },
   })
     .then((user) => {
