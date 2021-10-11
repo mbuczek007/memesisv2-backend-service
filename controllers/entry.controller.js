@@ -66,9 +66,39 @@ exports.create = async (req, res) => {
   }
 
   const sourceElem = source ? `<img src="${source}" alt/>` : '';
+  const logo = '<img src="https://i.ibb.co/s5Sq7rN/logo.png" class="ew-logo">';
+  const title = req.body.title ? `<h2>${req.body.title} </h2>` : '';
   const description = req.body.description
     ? `<div class="desc">${req.body.description}</div>`
     : '';
+
+  let imageHtmlTemplate = `
+    <body>
+        <div class="image-outline">
+          ${logo}
+          ${sourceElem}
+        </div>
+        ${title}
+        ${description}
+    </body>
+    `;
+
+  if (req.body.source_type == 'text') {
+    imageHtmlTemplate = `
+    <body>
+        <div class="image-outline ${req.body.source_type}">
+          ${logo}
+          <div>
+            ${title}
+            ${description}
+          </div>
+        </div>
+    </body>
+    `;
+  }
+
+  const width = 702;
+  const height = 100;
 
   const image = await nodeHtmlToImage({
     type: 'jpeg',
@@ -86,8 +116,6 @@ exports.create = async (req, res) => {
         }
 
         body {
-          width: 702px;
-          height: auto;
           font-family: "Signika", "Helvetica", "Arial", sans-serif;
           line-hright: 1.2;
           padding: 30px;
@@ -135,6 +163,13 @@ exports.create = async (req, res) => {
           position: relative;
         }
 
+        .image-outline.text {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 25px 20px 40px;
+        }
+
         .image-outline:before {
           content: '';
           position: absolute;
@@ -170,21 +205,16 @@ exports.create = async (req, res) => {
 
       </style>
     </head>
-    <body>
-        <div class="image-outline">
-          <img src="https://i.ibb.co/s5Sq7rN/logo.png" class="ew-logo">
-          ${sourceElem}
-        </div>
-        <h2>
-          ${req.body.title}
-       </h2>
-      ${description}
-    </body>
+      ${imageHtmlTemplate}
   </html>
   `,
     puppeteerArgs: {
-      args: ['--no-sandbox', '--headless'],
+      args: ['--no-sandbox', '--headless', `--window-size=${width},${height}`],
       ignoreHTTPSErrors: true,
+      defaultViewport: {
+        width,
+        height,
+      },
     },
   });
 
