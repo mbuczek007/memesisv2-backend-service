@@ -1,3 +1,3 @@
 module.exports = {
-  secret: 'memesis-!iVirtua#090',
+  secret: process.env.AUTH_SECRET,
 };
