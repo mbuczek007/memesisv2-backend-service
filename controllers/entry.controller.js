@@ -7,6 +7,8 @@ const { utils } = require('../utils');
 const db = require('../models');
 const Entry = db.entry;
 
+const ip = require('ip');
+
 exports.create = async (req, res) => {
   if (!req.body.title) {
     res.status(400).send({
@@ -234,7 +236,7 @@ exports.create = async (req, res) => {
     source_type: req.body.source_type,
     disable_comments: req.body.disable_comments,
     is_private: req.body.is_private,
-    created_ip_address: req.clientIp,
+    created_ip_address: ip.address(),
     user_id: req.body.user_id,
   };
 
