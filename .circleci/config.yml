@@ -7,7 +7,7 @@ jobs:
       - image: arvindr226/alpine-ssh
     steps:
       - checkout
-      - run: ssh -oStrictHostKeyChecking=no -v -p $PORT $USER@$IP "./deploy-ew-prod-api.sh"
+      - run: ssh -oStrictHostKeyChecking=no -v -p $PORT $USER@$IP "./deploy-api.sh"
 
 # Orchestrate our job run sequence
 workflows:
