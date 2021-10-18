@@ -7,6 +7,9 @@ const { Op } = db.Sequelize;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 exports.signup = (req, res) => {
   if (
     req.body.name === '' ||
@@ -68,6 +71,24 @@ exports.signup = (req, res) => {
   })
     .then((user) => {
       user.setRoles([1]).then(() => {
+        const msg = {
+          to: req.body.email,
+          from: 'no-reply@ewangelizatory.pl',
+          subject: 'Ewangelizatory.pl - Konto zostało utowrzone!',
+          text: 'Konto zostało utworzone w serwisie ewangelizatory.pl',
+          html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        };
+
+        sgMail
+          .send(msg)
+          .then((response) => {
+            console.log(response[0].statusCode);
+            console.log(response[0].headers);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
         res.send({ message: 'User was registered successfully!' });
       });
     })
