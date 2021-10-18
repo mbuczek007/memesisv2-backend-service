@@ -73,7 +73,7 @@ exports.signup = (req, res) => {
       user.setRoles([1]).then(() => {
         const msg = {
           to: req.body.email,
-          from: 'no-reply@ewangelizatory.pl',
+          from: 'noreply@ewangelizatory.pl',
           subject: 'Ewangelizatory.pl - Konto zostało utowrzone!',
           text: 'Konto zostało utworzone w serwisie ewangelizatory.pl',
           html: '<strong>and easy to do anywhere, even with Node.js</strong>',
