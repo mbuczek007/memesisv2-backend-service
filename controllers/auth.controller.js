@@ -72,10 +72,10 @@ exports.signup = (req, res) => {
     .then((user) => {
       user.setRoles([1]).then(() => {
         const msg = {
-          to: req.body.email, // Change to your recipient
-          from: 'test@example.com', // Change to your verified sender
-          subject: 'Sending with SendGrid is Fun',
-          text: 'and easy to do anywhere, even with Node.js',
+          to: req.body.email,
+          from: 'no-reply@ewangelizatory.pl',
+          subject: 'Ewangelizatory.pl - Konto zostało utowrzone!',
+          text: 'Konto zostało utworzone w serwisie ewangelizatory.pl',
           html: '<strong>and easy to do anywhere, even with Node.js</strong>',
         };
 
