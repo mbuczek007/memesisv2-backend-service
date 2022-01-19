@@ -1,0 +1,30 @@
+version: '4.4.3'
+
+services:
+  memesis-backend-service:
+    container_name: memesis-backend-service
+    build: './'
+    ports:
+     - 8080:8080
+    volumes:
+     - .:/app
+     - /app/node_modules
+    networks:
+     - memesis
+
+  db:
+    container_name: db
+    image: mariadb:latest
+    environment:
+      MYSQL_DATABASE: memesis-local
+      MYSQL_USER: memesis
+      MYSQL_PASSWORD: memesis
+      MYSQL_ROOT_PASSWORD: memesis
+    ports:
+     - 127.0.0.1:3307:3306
+    volumes:
+     - /home/mbuczek/Sites/docker/database/db/mysql:/var/lib/mysql
+    networks:
+     - memesis
+networks:
+  memesis:

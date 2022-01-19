@@ -211,7 +211,7 @@ exports.create = async (req, res) => {
   </html>
   `,
     puppeteerArgs: {
-      args: ['--no-sandbox', '--headless', `--window-size=${width},${height}`],
+      args: ['--no-sandbox', '--headless', '--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', `--window-size=${width},${height}`],
       ignoreHTTPSErrors: true,
       defaultViewport: {
         width,
